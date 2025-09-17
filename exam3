@@ -1,0 +1,14 @@
+from dash import Dash, html, dcc
+ 
+app = Dash(__name__)
+ 
+app.layout = html.Div([
+    html.H1('Example H1', style={'color':'blue', 'textAlign':'center'}),
+    html.Div([
+        html.H3('Example H3', style={'color':'green'}),
+        html.P('Example P', style={'fontSize':20,'marginLeft':50})
+    ], className='my-class2')
+])
+ 
+if __name__ == "__main__":
+    app.run_server(debug=True, port=port, jupyter_mode='external')
