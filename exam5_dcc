@@ -1,0 +1,37 @@
+from dash import Dash, dcc, html
+import dash_bootstrap_components as dbc
+
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+header = html.H2('Welcome to My Homepage', className='bg-info p-2 m-2 text-center')
+
+left = dbc.Card([ 
+    html.H3('Left Card'),
+    html.Hr(),
+    dbc.Alert('Left Alert')
+], className='bg-warning p-3')
+
+top = dbc.Card([
+    html.H3('Top Card'),
+    html.Hr(),
+    dbc.Alert('Top Alert')
+], className='p-3')
+
+bottom = dbc.Card([
+    html.H3('Bottom Card'),
+    html.Hr(),
+    dbc.Alert('Bottom Alert')
+], className='p-3')
+
+app.layout = dbc.Container([  
+    header,
+    dbc.Row( [dbc.Col(left, width={'size':3, 'offset':1}),
+              dbc.Col([
+                  dbc.Row(dbc.Col(top)),
+                  dbc.Row(dbc.Col(bottom),  className='mt-3')
+              ], width=6)
+    ]) 
+])
+
+if __name__ == "__main__":
+    app.run_server(debug=True, port=port, jupyter_mode='external')
