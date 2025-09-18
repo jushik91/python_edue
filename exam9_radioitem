@@ -1,0 +1,16 @@
+from dash import Dash, html, dcc, Output, Input, callback
+import plotly.express as px
+app = Dash(__name__)
+ 
+app.layout = html.Div([
+    dcc.RadioItems(['red', 'blue', 'green'], id='radio'),
+    html.Div(id='result')
+], style={'width':600})
+ 
+@callback(Output('result', 'children'), Input('radio', 'value'),
+          prevent_initial_call=True)
+def func(color):
+    return html.H3(children=f'Selected {color}', style={'color':color})
+     
+if __name__ == '__main__':
+    app.run_server(debug=True, port=port, jupyter_mode='external')
