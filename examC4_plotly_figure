@@ -1,0 +1,14 @@
+import plotly.graph_objects as go
+ 
+bar = go.Bar(x=[1,2,3], y=[2,1,3])
+fig = go.Figure(data=[bar], 
+              layout={'width':600, 'title':{'text':"Plotly Chart", 'font':{'size':30, 'color':'red'}}})
+ 
+fig.show()
+/**************************************************************
+    Problem: 7706
+    Language: Bash
+    Result: Accepted
+    Time:0 ms
+    Memory:0 kb
+****************************************************************/
