@@ -1,0 +1,26 @@
+from dash import Dash, html, dcc, callback, Input, Output, no_update
+import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
+import plotly.express as px
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+df = px.data.tips()
+app.layout = dbc.Card([
+    dcc.RadioItems(options=['sex','smoker','day','time'], 
+                   value='sex', id='rdo_column'),
+    dcc.Graph(id="graph")
+], body=True)
+ 
+@callback( 
+    Output('graph', 'figure'),
+    Input('rdo_column', 'value')
+)
+def update_chart(column):
+    if not column : return no_update
+    fig = px.scatter(df, x='total_bill', y='tip', color=column)
+    return fig
+ 
+ 
+if __name__ == '__main__':
+    app.run(debug=True, port=port, jupyter_mode='external')
