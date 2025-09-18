@@ -1,1 +1,30 @@
 
+import dash_bootstrap_components as dbc
+from dash import Dash, html, dcc, Output, Input, State, callback
+dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, dbc_css])
+ 
+day_info = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+day = [{'label':day_info[x], 'value':x} for x in range(7)]
+hour = {x:f'{x}h' for x in range(9,19)}
+ 
+app.layout = html.Div([
+    html.H3('Select day and hour'),
+    dcc.RadioItems(options=day, id='day', inline=True, labelStyle={'margin-left':5}),
+    dcc.RangeSlider(9, 18, 1, value=[9,18], marks=hour, id='hour'),
+    dbc.Button('Submit', id='button', n_clicks=0, className='col-6 mx-auto'),
+    html.Hr(),
+    html.Div(id='result', className='h5')    
+], className='d-grid gap-2 dbc col-8')
+ 
+@callback(Output('result', 'children'), Input('button', 'n_clicks'), State('day', 'value'), State('hour','value'))
+def func(button, day, hour):
+    print(day, hour)
+    if button and day is not None and hour :
+        cnt = hour[1] - hour[0]
+        if day>=5 : return f'{day_info[day]} / {cnt} hour : {20000*cnt:,} won'
+        else : return f'{day_info[day]} / {cnt} hour : {10000*cnt:,} won'
+ 
+if __name__ == '__main__':
+    app.run_server(debug=True, port=port, jupyter_mode='external')
