@@ -1,0 +1,13 @@
+import plotly.express as px
+ 
+df = px.data.gapminder().query('continent=="Oceania"')
+ 
+data = dict(data_frame=df, x='gdpPercap', y='lifeExp')
+fig = px.scatter(**data, size='pop', size_max=50, 
+                 facet_col='country', 
+                 color='country', color_discrete_sequence=['orange','green'],
+                 title='Gapmainder Char', 
+                 labels={'gdpPercap':'GDP', 'lifeExp':'Life Expertancy'}, 
+                 hover_name='country', width=800)
+ 
+fig.show()
