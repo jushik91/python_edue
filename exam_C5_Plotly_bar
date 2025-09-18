@@ -1,0 +1,23 @@
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+ 
+df = px.data.tips()
+day = pd.Categorical(df['day'], ['Thur','Fri','Sat','Sun'])
+gdf = df.groupby(day)['size'].agg(['count', 'sum'])
+avg = gdf['sum'].mean()
+print(gdf, avg, sep='\n')
+ 
+b1 = go.Bar(x=gdf.index, y=gdf['count'], name='건수', marker_color='gold')
+b2 = go.Bar(x=gdf.index, y=gdf['sum'], name='방문자수', marker_color='skyblue')
+fig = go.Figure(data=[b1, b2])
+ 
+fig.update_traces(texttemplate='%{y}', textposition='outside', textfont_size=16)
+ 
+fig.update_layout(title_text='요일별 방문 건수 & 방문자수', title_font_size=24)
+fig.update_layout(yaxis_title='방문자수', yaxis_range=[0, max(gdf['sum'])+50])
+fig.update_layout(legend_orientation='h', legend_yanchor='top', legend_y=0.99)
+fig.add_hline(y=avg, line_dash='dash', line_color='green')
+fig.add_annotation(x=1, y=avg, text=f'평균 방문자수 {avg}', showarrow=True, arrowhead=1)
+ 
+fig.show()
