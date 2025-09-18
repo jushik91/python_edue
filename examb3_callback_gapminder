@@ -1,0 +1,26 @@
+from dash import Dash, html, dcc, Output, Input, callback, no_update
+import dash_bootstrap_components as dbc
+import plotly.express as px
+import pandas as pd
+import numpy as np
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+df = px.data.gapminder()
+continent_list = df['continent'].unique()
+print(continent_list)
+ 
+app.layout = dbc.Card([
+    dcc.RadioItems(continent_list, 'Asia', id='rdo_continent'),
+    dcc.Dropdown(id='drp_country'),
+], body=True)
+ 
+# [2] callback 설계
+@callback(Output('drp_country', 'options'), Input('rdo_continent', 'value'))
+def func(p_continent):
+    if not p_continent : return no_update
+    country_list = df.query('continent==@p_continent')['country'].unique()
+    return country_list
+ 
+if __name__ == '__main__':
+    app.run(debug=True, port=port, jupyter_mode='external')
