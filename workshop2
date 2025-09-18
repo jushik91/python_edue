@@ -1,0 +1,149 @@
+# 솔루션 ==============================================
+
+import dash_bootstrap_components as dbc
+from dash import Dash, html, dcc, Output, Input, State, callback, dash_table, no_update
+import pandas as pd
+from dash.exceptions import PreventUpdate # 특정 상황에서 업데이트 안하도록 지정
+import plotly.graph_objects as go
+import plotly.express as px
+
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+
+# [1 단계] 전역 변수 설계(코드 분석) 
+df = pd.read_csv('car_data.csv')
+company_list = df['company'].sort_values().unique()
+year_min, year_max = df['year'].agg(['min', 'max'])
+year_marks = {i:str(i) for i in range(year_min, year_max+1, 5)}
+
+# DataTable에 지정할 옵션
+table_option=dict(
+        page_size=20, 
+        sort_action='native',
+        style_header={'textAlign': 'center','backgroundColor': 'lightgray', 'fontWeight': 'bold' }
+)
+
+# Tab에 지정할 CSS style
+tab_selected_style="fw-bold border border-secondary bg-secondary bg-opacity-10 rounded-top"
+
+
+# [2 단계] Layout 설계
+header = html.H1('🚗 Used Car Sales Analysis Dashboard', className='p-3 fw-bold text-white text-center', style={'backgroundColor':'#34495e'})
+
+# [2-1] left 변수에 입력 UI 메뉴 설계
+left = dbc.Card([
+    html.H6('Select Company & Model & Year', className='fw-bold'),
+    dcc.Dropdown(options=company_list, value=company_list[0], id='drp_company'),
+    dcc.Checklist([{'label':' Select all model', 'value':'all'}], id='chk_all'), # 모든 모델 선택하는 체크리스트 UI
+    dcc.Dropdown(multi=True, id='drp_model'),
+    dcc.RangeSlider(year_min, year_max,  step=1, value=[year_min, year_max], marks=year_marks, id='rsd_year',
+                    tooltip={"placement": "bottom", "always_visible": True}),   
+    dbc.Button('Data Submit' , n_clicks=0, color='secondary', id='btn_submit', className='col-6')
+], className='p-3 d-grid gap-4')
+
+
+# [2-2] right에 Tabs 구성
+tab1 = html.Div([
+    dcc.Graph(id='grp_histogram'),
+    html.Div([
+        dcc.Graph(id='grp_pie1', className='col-6'),
+        dcc.Graph(id='grp_pie2', className='col-6'),
+    ], className='hstack gap-1')
+])
+
+tab2 = html.Div([
+    dbc.Button('Download', n_clicks=0, id='btn_download', color='secondary', size='sm', className='mb-2'),
+    dcc.Download(id='download'),
+    dash_table.DataTable(**table_option, id='datatable')
+])
+
+right = dbc.Card([
+    dcc.Tabs([
+            dcc.Tab(tab1, label='📊 Graph', selected_className=tab_selected_style),
+            dcc.Tab(tab2, label='📚 Raw Data', selected_className=tab_selected_style),
+    ], className='h4')   
+])
+
+
+app.layout = dbc.Container([
+    header,
+    dbc.Row([
+        dbc.Col(left, width=4),
+        dbc.Col(right, width=8),
+    ], className='g-2'),        
+], fluid=True)
+
+
+# [3 단계] 콜백 설계
+# [3-1 콜백]
+@callback(
+    Output('drp_model', 'options'), 
+    Output('drp_model', 'value'),
+    Input('drp_company', 'value'),
+    Input('chk_all', 'value')
+)
+def display_model(p_company, p_all):
+    print(p_company, p_all)
+    if not p_company: raise PreventUpdate
+    model_list = df.query('company==@p_company')['model'].unique()
+    if p_all==['all'] : return model_list, model_list
+    else: return model_list, model_list[0]
+
+# [3-2 콜백]
+@callback(
+    Output('grp_histogram', 'figure'),
+    Output('grp_pie1', 'figure'),
+    Output('grp_pie2', 'figure'),
+    Output('datatable', 'data'),
+    Input('btn_submit', 'n_clicks'),
+    State('drp_company', 'value'), 
+    State('drp_model', 'value'), 
+    State('rsd_year', 'value'), 
+)
+def display_graph(button, p_company, p_model, p_year):
+    print(button, p_company, p_model, p_year)
+    if not button or not p_company or not p_model: raise PreventUpdate
+    
+    qdf = df.query('company==@p_company and model in @p_model and @p_year[0]<=year<=@p_year[1]').sort_values('year')
+    #print(qdf.head())
+    
+    # figure layout에 지정할 옵션
+    layout_option=dict(title_y=0.92, title_x=0.5, title_font_size=20, yaxis_showgrid=True, template='simple_white')
+
+    # 모델별 초저가와 최고가 가격 비교 histogram 차트
+    fig1 = go.Figure()
+    fig1.add_histogram(x=qdf['model'], y=qdf['price'], histfunc='min', name='min', marker_color='#f8c471')
+    fig1.add_histogram(x=qdf['model'], y=qdf['price'], histfunc='max', name='max', marker_color='#2e86c1')
+    fig1.update_traces( texttemplate='%{y:,.0f}',   textposition='outside')
+    fig1.update_layout(title_text='<b>모델별 최저/최고 가격 비교</b>', **layout_option)
+
+    # 모델별 거래건수 집계하여 pie차트로 
+    df2 = qdf.value_counts('model').reset_index()
+    print(df2)
+    fig2 = px.pie(names=df2['model'], values=df2['count'], color_discrete_sequence=px.colors.qualitative.Prism, hole=0.4)
+    fig2.update_traces(textinfo='label+percent')
+    fig2.update_layout(title_text="<b>모델별 거래율 비교</b>",  **layout_option, showlegend=False)
+
+    # 연식별 거래건수 집계하여 pie차트로 
+    df3 = qdf.value_counts('year').reset_index()
+    print(df3)
+    fig3 = px.pie(names=df3['year'], values=df3['count'], color_discrete_sequence=px.colors.qualitative.Prism, hole=0.4)
+    fig3.update_traces(textinfo='label+percent')
+    fig3.update_layout(title_text="<b>연식별 거래율 비교</b>",  **layout_option, showlegend=False)
+    return fig1, fig2, fig3, qdf.to_dict('records')
+
+# [3-3 콜백] 
+@callback(
+    Output('download', 'data'),
+    Input('btn_download', 'n_clicks'),
+    State('datatable', 'data'),
+    prevent_initial_call=True
+)
+def download(button, datatable):
+    if not button: raise PreventUpdate
+    df = pd.DataFrame(datatable)
+    return dcc.send_data_frame(df.to_csv, 'raw_data.csv')
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=port, jupyter_mode='external') 
