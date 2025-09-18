@@ -1,0 +1,10 @@
+import plotly.express as px 
+ 
+df1 = px.data.stocks()
+df2 = px.data.stocks(indexed=True)
+ 
+fig1=px.bar(df1, x='date', y=['GOOG','AAPL'], labels={'value':'rate', 'variable':'company'})
+fig2=px.line(df2, facet_col='company', facet_col_wrap=2)
+ 
+fig1.show()
+fig2.show()
