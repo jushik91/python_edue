@@ -1,0 +1,12 @@
+import plotly.express as px
+ 
+df = px.data.gapminder()
+     
+fig1 = px.histogram(df,  x='continent', color='continent')
+fig2 = px.histogram(df,  x='continent', y='gdpPercap', histfunc='avg')
+fig3 = px.histogram(df, x='year', y='pop', color='continent')
+ 
+fig3.update_layout(bargap=0.1)
+fig1.show()
+fig2.show()
+fig3.show()
