@@ -1,0 +1,22 @@
+from dash import Dash, dcc, html
+import dash_bootstrap_components as dbc
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+app.layout = dbc.Container([  
+    dbc.Card([
+        html.H2("Title 1", className='text-center text-danger fw-bold'),
+        html.Hr(),
+        dbc.Alert('Alert', color='gold'),
+    ], className='m-3 p-3 w-50'),
+     
+    dbc.Card([
+        html.H3("Title 2"),
+        html.Hr(),
+        dbc.Button('Button1', color='danger'),
+        dbc.Button('Button2', className='mt-3'),
+    ], className='m-3 p-3 w-25', color='cyan')
+])
+ 
+if __name__ == "__main__":
+    app.run_server(debug=True, port=port, jupyter_mode='external')
