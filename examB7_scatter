@@ -1,0 +1,9 @@
+import plotly.express as px
+df = px.data.tips()
+d = dict(data_frame=df, x='total_bill', y='tip')
+ 
+fig1 = px.scatter(**d, color='smoker', color_discrete_sequence=['blue', 'red'])
+fig2 = px.scatter(**d, color='day', category_orders={'day':['Thur', 'Fri','Sat','Sun']}) 
+ 
+fig1.show()
+fig2.show()
