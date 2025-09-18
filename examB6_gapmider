@@ -1,0 +1,31 @@
+import dash_bootstrap_components as dbc
+from dash import Dash, html, dcc, Output, Input, State, callback, dash_table
+import pandas as pd
+import plotly.express as px
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+df = px.data.gapminder().query('continent=="Asia"').iloc[:, :-2]
+countryList = df['country'].unique()
+ 
+app.layout = html.Div([
+    html.H2('Population by year', className='bg-info text-center m-2 p-2'),
+    dbc.Row([
+        dbc.Col([
+            html.H4('Select Country'),
+            dcc.Dropdown(countryList, countryList[0], id='country', style={'width':400}),
+            dcc.Graph(id='graph') 
+        ], width=5),
+        dbc.Col(dash_table.DataTable(id='table', page_size=10), width=5, align='end')
+    ], justify='center', className='m-2')
+])
+# [2] 콜백 코드 구현
+@callback(Output('graph', 'figure'), Output('table', 'data'), Input('country', 'value'))
+def func(country):
+    qdf = df.query('country==@country')
+    fig = px.bar(qdf, x='year', y='pop', color='lifeExp')
+    fig.update_layout(font=dict(size=20), width=700)
+    return fig, qdf.to_dict('records')
+     
+if __name__ == '__main__':
+    app.run_server(debug=True, port=port, jupyter_mode='external')
