@@ -1,0 +1,21 @@
+import dash_bootstrap_components as dbc
+from dash import Dash, html, dcc, Output, Input, State, callback
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+app.layout = html.Div([
+    dcc.Input(type='number', id='height', placeholder='height(cm)'),
+    dcc.Input(type='number', id='weight', placeholder='weight(kg)'),
+    html.Hr(),
+    html.Div(children='bmi result', id='bmi', className='bg-info'),
+], className='d-grid gap-1 m-2 h5 w-25')
+ 
+@callback( Output('bmi','children'), 
+           Input('height', 'value'), Input('weight', 'value'),
+           prevent_initial_call=True )
+def func(height, weight): 
+    if height and weight : return f'{weight/(height/100)**2 : .2f}'
+    else: return 'bmi result'
+ 
+if __name__ == '__main__':
+    app.run_server(debug=True, port=port, jupyter_mode='external')
