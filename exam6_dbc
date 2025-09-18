@@ -1,0 +1,17 @@
+import dash_bootstrap_components as dbc
+from dash import Dash, html, dcc
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+ 
+app.layout = html.Div([
+    html.H3('Select day'),
+    dcc.Input(type='text', placeholder='input day'),
+    dcc.Dropdown(day, value='Mon', multi=True),
+    dcc.Checklist(day, value=['Mon'], inline=True, labelStyle={'margin-right':10}),
+    dcc.Slider(0, 6, step=1, value=1, marks={i:day[i] for i in range(7)})
+], className='d-grid gap-4 h5 m-3')
+ 
+if __name__ == '__main__':
+    app.run_server(debug=True, port=port, jupyter_mode='external')
