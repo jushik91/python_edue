@@ -1,0 +1,28 @@
+import dash_bootstrap_components as dbc
+from dash import Dash, html, dcc, Output, Input, callback
+ 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+ 
+app.layout = dbc.Container([
+    dbc.Card([
+        html.H3('Login', className='text-center'),
+        html.Hr(),
+        html.H5('Username or Email'),
+        dcc.Input(placeholder='Username or Email'),
+        html.H5('Password'),
+        dcc.Input(placeholder='Password'),
+        html.H5('Select Account'),
+        dcc.Dropdown(['Naver', 'Google', 'Facebook'])
+    ], className='m-3 p-3 w-25', color='lightcyan'),
+     
+    dbc.Card([
+        dcc.Checklist(['Auto Login', 'Save ID'], inline=True, labelStyle={'margin-right':20}),
+        html.A("Create Account?", href='/'), 
+        html.Br(),
+        dbc.Button('Log in')
+    ], className='gap-1 w-25 m-3 p-3 border-0')
+])
+ 
+ 
+if __name__ == '__main__':
+    app.run_server(debug=True, port=port, jupyter_mode='external')
